@@ -8,25 +8,25 @@ let artistasSuspeitos = [
         nome: "P. Diddy",
         idade: 54,
         descricaoFisica: ["Homem", "Negro", "Barbudo", "Alto"],
-        AtividadeSuspeita: true
+        atividadeSuspeita: "sim"
     },
     {
         id: Number(Math.floor(Math.random()* 99)+ 1),
         nome: "Justin Bieber",
         idade: 30,
         descricaoFisica: ["Homem", "Branco", "Tatuado", "Loiro"],
-        AtividadeSuspeita: false
+        atividadeSuspeita: "não"
     },
     {
         id: Number(Math.floor(Math.random()* 99)+ 1),
         nome: "Beyoncé",
         idade: 43,
         descricaoFisica: ["Mulher", "Negra", "Olhos Castanhos", "Loira"],
-        atividadeSuspeita: true
+        atividadeSuspeita: "sim"
     }
 ]
 
-//Rota para buscar todos os elementos do array artistasSuspeitos
+//Rota para buscar todos os artistasSuspeitos
 suspeitosRoutes.get("/", (req, res) => {
     return res.status(200).send(artistasSuspeitos)
 })
@@ -36,16 +36,16 @@ suspeitosRoutes.post("/", (req, res) => {
     const { nome, idade, descricaoFisica, atividadeSuspeita } = req.body
 
     //Validação de campos obrigatórios
-    if(!nome || !idade || !atividadeSuspeita) {
-        return res.status(400).send({message: "O campo nome é obrigatório!"})
+    if(!nome || !idade) {
+        return res.status(400).send({message: "Os campos nome e idade são obrigatórios"})
     }
 
     if(atividadeSuspeita != "sim" && atividadeSuspeita != "não") {
         return res.status(400).send({message: "Por favor digitar 'sim' ou 'não'"})
     }
 
-    if(idade != Number.isInteger){
-        return res.status(400).send({message: "Por favor digite um número inteiro"})
+    if(!Number.isInteger(idade)){
+        return res.status(400).send({message: "Por favor digitar um número inteiro"})
     }
 
 
@@ -58,12 +58,14 @@ suspeitosRoutes.post("/", (req, res) => {
     }
 
     artistasSuspeitos.push(novoSuspeito)
-    return res.status(201).send({message: "Artista Suspeito cadastrado com sucesso!"})
+    return res.status(201).send({message: "Artista Suspeito cadastrado com sucesso!", novoSuspeito})
 })
 
 // Rota para buscar um artistaSuspeito pelo id
 suspeitosRoutes.get("/:id", (req, res) => {
     const { id } = req.params;
+
+    const artista = artistasSuspeitos.find((artist) => artist.id == id);
 
     // Verifica se o artistaSuspeito foi encontrado
     if (!artista) {
@@ -71,7 +73,7 @@ suspeitosRoutes.get("/:id", (req, res) => {
     }
 
     return res.status(200).send(artista);
-});
+})
 
 // Rota para atualizar um artistaSuspeito pelo id
 suspeitosRoutes.put("/:id", (req, res) => {
@@ -80,13 +82,30 @@ suspeitosRoutes.put("/:id", (req, res) => {
 
     const artista = artistasSuspeitos.find((artist) => artist.id == id);
 
-    artista.nome = nome;
-    artista.idade = idade;
-    artista.descricaoFisica = descricaoFisica || [];
-    artista.atividadeSuspeita = atividadeSuspeita;
+    //Validação de campos obrigatórios
+    if(!nome || !idade) {
+        return res.status(400).send({message: "Os campos nome e idade são obrigatórios"})
+    }
+
+    if(atividadeSuspeita != "sim" && atividadeSuspeita != "não") {
+        return res.status(400).send({message: "Por favor digitar 'sim' ou 'não'"})
+    }
+
+    if(!Number.isInteger(idade)){
+        return res.status(400).send({message: "Por favor digitar um número inteiro"})
+    }
+
+    if (!artista) {
+        return res.status(404).send({ message: `Artista Suspeito com id ${id} não foi encontrado` });
+        }
+
+    artista.nome = nome
+    artista.idade = idade
+    artista.descricaoFisica = descricaoFisica || []
+    artista.atividadeSuspeita = atividadeSuspeita
 
     return res.status(200).send({message: "Artista Suspeito atualizado com sucesso!",artista,});
-});
+})
 
 //Rota para deletar um artistaSuspeito
 suspeitosRoutes.delete("/:id", (req,res) => {
